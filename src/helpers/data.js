@@ -3,23 +3,31 @@ const { v1: uuidv1} = require('uuid');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
 
+// saves document to firestore, returns id of the created document
 const saveData = async (doc) => {
   doc.timestamp = new Date().getTime();
-  await db.collection("data").add(doc);
+  let docRef = await db.collection("data").add(doc);
+  return docRef.id;
 }
 
+// saves document to firestore
 const getData = async (limit) => {
   let results = await db.collection("data").get();
   results = results.docs.map(doc => doc.data());
 
   if (isNaN(parseInt(limit))) limit = 50;
   if (results.length > limit) results = results.slice(0, limit);
-  
+
   // reverse chronological
   results.sort((a, b) => b.timestamp - a.timestamp);
   return results;
 }
 
+const patchVariance = async (docId, variance) => {
+  await db.collection("data").doc(docId).update({ variance: variance })
+}
+
+// save recording blob to azure
 const saveRecording = async (filepath) => {
   const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
   const containerClient = blobServiceClient.getContainerClient("recordings");
@@ -45,4 +53,4 @@ const saveRecording = async (filepath) => {
   return url;
 }
 
-module.exports = { saveData, getData, saveRecording }
+module.exports = { saveData, getData, patchVariance, saveRecording }

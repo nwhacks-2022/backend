@@ -1,7 +1,7 @@
 let express = require('express');
 const fs = require('fs');
 let { getWavName, makeWav, makeClip, getAudioLen, calculateWpm } = require('../helpers/audio');
-const { saveRecording, saveData } = require('../helpers/data');
+const { saveRecording, saveData, patchVariance } = require('../helpers/data');
 const getText = require('../helpers/speechtotext');
 const variance = require('../helpers/variance');
 
@@ -71,6 +71,9 @@ uploadRouter.post("/", async (req, res, next) => {
       wpm: wpm
     }
 
+    // save data to firestore collection
+    const docId = await saveData(document);
+
     // send response
     res.status(200).json(document)
 
@@ -80,6 +83,7 @@ uploadRouter.post("/", async (req, res, next) => {
     const clipLen = 5;
     const numClips = Math.floor(audiolen / clipLen);
     let wpms = [];
+    let audiovariance = 0;
     if (numClips > 1) {
       for (let i = 0; i < numClips; i++) {
         // make clip
@@ -101,14 +105,11 @@ uploadRouter.post("/", async (req, res, next) => {
 
       const v = variance(wpms, wpm)
 
-      document.variance = v ? v : 0;
-    }
-    else {
-      document.variance = 0;
+      audiovariance = v ? v : 0;
     }
 
-    // save data to firestore collection
-    await saveData(document);
+    // patch variance to the added document
+    await patchVariance(docId, audiovariance);
 
     // clean up files
     for (let item of cleanupList) {
