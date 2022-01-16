@@ -1,7 +1,7 @@
 let express = require("express");
 let cors = require("cors");
 let bodyParser = require("body-parser");
-const wpmRouter = require("./routes/wpm");
+const uploadRouter = require("./routes/upload");
 const Multer = require('multer');
 
 const dotenv = require('dotenv');
@@ -28,7 +28,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // routes
-app.use("/wpm", multer.single('file'), wpmRouter);
+app.use("/upload", multer.single('file'), uploadRouter);
 app.use("/question", questionRouter);
 
 app.use("/", (req, res, next) => {
