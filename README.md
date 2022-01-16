@@ -15,10 +15,12 @@ A project for nwHacks 2022
   - question: question as a string
 ### /question
 - GET: returns array of questions
+  - count (query): limits number of elements returned, default 10
 - POST: uploads a single question to Google Firestore
   - question: question as a string
 ### /history
 - GET: returns a list of data objects that have been saved
+  - count (query): limits number of elements returned, default 50
 
 ## Data
 - link to recording in Azure
