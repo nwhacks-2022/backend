@@ -80,27 +80,32 @@ uploadRouter.post("/", async (req, res, next) => {
     const clipLen = 5;
     const numClips = Math.floor(audiolen / clipLen);
     let wpms = [];
-    for (let i = 0; i < numClips; i++) {
-      // make clip
-      const startTime = i * clipLen;
-      const endTime = audiolen < (i+1) * clipLen ? audiolen : (i+1) * clipLen;
-      const duration = endTime - startTime;
+    if (numClips > 1) {
+      for (let i = 0; i < numClips; i++) {
+        // make clip
+        const startTime = i * clipLen;
+        const endTime = audiolen < (i+1) * clipLen ? audiolen : (i+1) * clipLen;
+        const duration = endTime - startTime;
+  
+        const fp = await makeClip(getWavName(filepath), startTime, duration, i);
+        cleanupList.push(fp);
+  
+        // get num words
+        const cliptext = await getText(fp);
+  
+        // find wpm
+        wpms.push(calculateWpm(cliptext, duration));
+      }
+  
+      console.log("wpms:", wpms);
 
-      const fp = await makeClip(getWavName(filepath), startTime, duration, i);
-      cleanupList.push(fp);
+      const v = variance(wpms, wpm)
 
-      // get num words
-      const cliptext = await getText(fp);
-
-      // find wpm
-      wpms.push(calculateWpm(cliptext, duration));
+      document.variance = v ? v : 0;
     }
-
-    console.log("wpms:", wpms);
-
-    const v = variance(wpms, wpm);
-
-    document.variance = v;
+    else {
+      document.variance = 0;
+    }
 
     // save data to firestore collection
     await saveData(document);

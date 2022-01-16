@@ -4,7 +4,7 @@
 const variance = (arr = [], mean) => {
   if (!arr.length || isNaN(mean)) {
     console.log("what on earth", arr, mean)
-    return;
+    return 0;
   }
 
   let variance = 0;
