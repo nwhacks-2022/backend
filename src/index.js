@@ -4,7 +4,8 @@ let bodyParser = require("body-parser");
 const wpmRouter = require("./routes/wpm");
 const Multer = require('multer');
 
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
+const questionRouter = require("./routes/question");
 dotenv.config()
 
 // file info
@@ -28,6 +29,8 @@ app.use(bodyParser.json());
 
 // routes
 app.use("/wpm", multer.single('file'), wpmRouter);
+app.use("/question", questionRouter);
+
 app.use("/", (req, res, next) => {
   res.status(200).send("hello :)");
 })
