@@ -27,10 +27,10 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // routes
+app.use("/wpm", multer.single('file'), wpmRouter);
 app.use("/", (req, res, next) => {
   res.status(200).send("hello :)");
 })
-app.use("/wpm", multer.single('file'), wpmRouter);
 
 let port = parseInt(process.env.PORT || "");
 if (isNaN(port) || port === 0) {
