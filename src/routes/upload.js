@@ -23,6 +23,13 @@ const cleanup = async (filepath) => {
   }
 }
 
+const runCleanup = async (lst) => {
+  // clean up files
+  for (let item of lst) {
+    await cleanup(item);
+  }
+}
+
 let uploadRouter = express.Router();
 
 uploadRouter.post("/", async (req, res, next) => {
@@ -52,12 +59,18 @@ uploadRouter.post("/", async (req, res, next) => {
     await makeWav(filepath);
     cleanupList.push(getWavName(filepath));
 
-    // get text
-    let text = await getText(filepath);
-
     // audio length
     const audiolen = await getAudioLen(getWavName(filepath));
     console.log("audiolen: ", audiolen);
+
+    if (audiolen > 30) {
+      res.status(500).send("We're capping answers at 30 seconds for now!");
+      runCleanup(cleanupList);
+      return;
+    }
+
+    // get text
+    let text = await getText(filepath);
 
     // wpm
     const wpm = calculateWpm(text, audiolen);
@@ -116,9 +129,7 @@ uploadRouter.post("/", async (req, res, next) => {
     await patchVariance(docId, audiovariance);
 
     // clean up files
-    for (let item of cleanupList) {
-      await cleanup(item);
-    }
+    runCleanup(cleanupList);
   }
   catch(err) {
     console.log("ERROR:", err)
