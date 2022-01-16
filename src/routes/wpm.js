@@ -69,11 +69,40 @@ wpmRouter.get("/", async (req, res, next) => {
     let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
     let text = await new Promise((resolve, reject) => {
-      recognizer.recognizeOnceAsync(resultt => {
-        console.log(`RECOGNIZED: Text=${resultt.text}`);
-        recognizer.close();
-        resolve(resultt.text);
-      });
+      let result = "";
+      
+      recognizer.recognized = (s, e) => {
+        if (e.result.reason == sdk.ResultReason.RecognizedSpeech) {
+          console.log(`RECOGNIZED: Text=${e.result.text}`);
+          result += " " + e.result.text;
+        }
+        else if (e.result.reason == sdk.ResultReason.NoMatch) {
+          console.log("NOMATCH: Speech could not be recognized.");
+        }
+      };
+      
+      recognizer.canceled = (s, e) => {
+        console.log(`CANCELED: Reason=${e.reason}`);
+    
+        if (e.reason == sdk.CancellationReason.Error) {
+          console.log(`CANCELED: ErrorCode=${e.errorCode}`);
+          console.log(`CANCELED: ErrorDetails=${e.errorDetails}`);
+          reject();
+        }
+
+        recognizer.stopContinuousRecognitionAsync();
+        result = result.substring(1);
+        resolve(result);
+      };
+      
+      recognizer.sessionStopped = (s, e) => {
+        console.log("\n    Session stopped event.");
+        recognizer.stopContinuousRecognitionAsync();
+        result = result.substring(1);
+        resolve(result);
+      };
+
+      recognizer.startContinuousRecognitionAsync();
     });
 
     const audiolen = await getAudioLen(getWavName(filepath));
