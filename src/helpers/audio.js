@@ -64,6 +64,7 @@ const getAudioLen = async (filepath) => {
 
 // calcuates words per minute
 const calculateWpm = (text, audiolen) => {
+  if (text === "") return 0; 
   const words = text.split(' ').length;
   return words / (audiolen / 60);
 }
