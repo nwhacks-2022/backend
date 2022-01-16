@@ -16,10 +16,12 @@ const getData = async (limit) => {
   results = results.docs.map(doc => doc.data());
 
   if (isNaN(parseInt(limit))) limit = 50;
-  if (results.length > limit) results = results.slice(0, limit);
 
   // reverse chronological
   results.sort((a, b) => b.timestamp - a.timestamp);
+  
+  if (results.length > limit) results = results.slice(0, limit);
+  
   return results;
 }
 
