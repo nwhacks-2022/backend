@@ -54,7 +54,7 @@ const calculateWpm = (text, audiolen) => {
   return words / (audiolen / 60);
 }
 
-wpmRouter.get("/", async (req, res, next) => {
+wpmRouter.post("/", async (req, res, next) => {
   // file is in req.file
   if (!req.file) {
     res.status(400).json({
