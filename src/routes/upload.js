@@ -7,6 +7,7 @@ const variance = require('../helpers/variance');
 
 const uploadDir = './uploads';
 
+// removes one file
 const cleanup = async (filepath) => {
   try{
     await new Promise((resolve, reject) => {
@@ -43,6 +44,8 @@ uploadRouter.post("/", async (req, res, next) => {
       return;
     }
     const filepath = `${uploadDir}/${req.file.filename}`;
+
+    // keep a list of files to clean up
     let cleanupList = [filepath];
 
     // convert to wav
@@ -74,7 +77,8 @@ uploadRouter.post("/", async (req, res, next) => {
     // save data to firestore collection
     const docId = await saveData(document);
 
-    // send response
+    // send response. calculating variance takes a few extra seconds, we decided to
+    // get back to the client first and patch the document after.
     res.status(200).json(document)
 
     // calculate wpm for clips of the audio- goal is to see whether the wpm varies greatly across
@@ -83,7 +87,7 @@ uploadRouter.post("/", async (req, res, next) => {
     const clipLen = 5;
     const numClips = Math.floor(audiolen / clipLen);
     let wpms = [];
-    let audiovariance = 0;
+    let audiovariance = -1;
     if (numClips > 1) {
       for (let i = 0; i < numClips; i++) {
         // make clip

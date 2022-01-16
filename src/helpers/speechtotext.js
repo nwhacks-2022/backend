@@ -2,6 +2,7 @@ const fs = require('fs');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 let { getWavName } = require('../helpers/audio');
 
+// communicates with azure to get the text from an audio file
 const getText = async (filepath) => {
   // azure speech to text
   const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_KEY, process.env.AZURE_LOCATION);
@@ -32,7 +33,7 @@ const getText = async (filepath) => {
       }
 
       recognizer.stopContinuousRecognitionAsync();
-      result = result.substring(1);
+      result = result.substring(1); // remove leading space
       resolve(result);
     };
     

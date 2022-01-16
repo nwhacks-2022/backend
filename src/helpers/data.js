@@ -21,10 +21,11 @@ const getData = async (limit) => {
   results.sort((a, b) => b.timestamp - a.timestamp);
   
   if (results.length > limit) results = results.slice(0, limit);
-  
+
   return results;
 }
 
+// updates variance of a document
 const patchVariance = async (docId, variance) => {
   await db.collection("data").doc(docId).update({ variance: variance })
 }
