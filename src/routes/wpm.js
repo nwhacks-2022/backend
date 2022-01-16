@@ -115,6 +115,22 @@ wpmRouter.get("/", async (req, res, next) => {
 
     const wpm = calculateWpm(text, audiolen);
 
+    // clean up files
+    try{
+      await new Promise((resolve, reject) => {
+        fs.unlink(filepath, (err) => {
+          if (err) reject();
+          fs.unlink(getWavName(filepath), (errr) => {
+            if (errr) reject();
+            else resolve();
+          });
+        });
+      })
+    }
+    catch(err) {
+      console.log("ERROR:", err)
+    }
+
     // send response
     res.status(200).json({
       text: text,
@@ -123,6 +139,7 @@ wpmRouter.get("/", async (req, res, next) => {
   }
   catch(err) {
     console.log("ERROR:", err)
+    res.status(500).send("Something went wrong. Please try again later.");
   }
 });
 
