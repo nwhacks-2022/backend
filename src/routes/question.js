@@ -4,7 +4,7 @@ let { db, auth } = require('../../firebase.js');
 let questionRouter = express.Router();
 
 questionRouter.get("/", async (req, res, next) => {
-  let count = req.body.count || 10;
+  let count = req.query.count || 10;
 
   let questions = [];
 
