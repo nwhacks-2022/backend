@@ -56,6 +56,11 @@ const calculateWpm = (text, audiolen) => {
 
 wpmRouter.get("/", async (req, res, next) => {
   // file is in req.file
+  if (!req.file) {
+    res.status(400).json({
+      message: "attach a file"
+    })
+  }
 
   try {
     const filepath = `${uploadDir}/${req.file.filename}`;
