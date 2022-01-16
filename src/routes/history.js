@@ -5,7 +5,7 @@ let historyRouter = express.Router();
 
 historyRouter.get("/", async (req, res, next) => {
   try {
-    let results = await getData();
+    let results = await getData(req.query.count);
 
     res.status(200).send(results);
   }

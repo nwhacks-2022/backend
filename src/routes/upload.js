@@ -53,19 +53,24 @@ uploadRouter.post("/", async (req, res, next) => {
     // upload recording to azure storage
     const url = await saveRecording(filepath);
 
-    // save data to collection
-    await saveData(url, text, req.body.question, audiolen, wpm);
-
     // clean up files
     await cleanup(filepath);
     await cleanup(getWavName(filepath));
 
-    // send response
-    res.status(200).json({
+    // info
+    const document = {
+      link: url,
       text: text,
-      wpm: wpm,
-      question: req.body.question
-    })
+      question: req.body.question,
+      duration: audiolen,
+      wpm: wpm
+    }
+
+    // save data to collection
+    await saveData(document);
+
+    // send response
+    res.status(200).json(document)
   }
   catch(err) {
     console.log("ERROR:", err)

@@ -3,21 +3,21 @@ const { v1: uuidv1} = require('uuid');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
 
-const saveData = async (link, text, question, audiolen, wpm) => {
-  const document = {
-    link: link,
-    text: text,
-    question: question,
-    duration: audiolen,
-    wpm: wpm
-  }
-
-  await db.collection("data").add(document);
+const saveData = async (doc) => {
+  doc.timestamp = new Date().getTime();
+  await db.collection("data").add(doc);
 }
 
-const getData = async () => {
+const getData = async (limit) => {
   let results = await db.collection("data").get();
-  return results.docs.map(doc => doc.data());
+  results = results.docs.map(doc => doc.data());
+
+  if (isNaN(parseInt(limit))) limit = 50;
+  if (results.length > limit) results = results.slice(0, limit);
+  
+  // reverse chronological
+  results.sort((a, b) => b.timestamp - a.timestamp);
+  return results;
 }
 
 const saveRecording = async (filepath) => {
