@@ -4,14 +4,27 @@ let { db, auth } = require('../../firebase.js');
 let questionRouter = express.Router();
 
 questionRouter.get("/", async (req, res, next) => {
+  let count = req.body.count || 10;
+
+  let questions = [];
+
   try {
     let results = await db.collection("question").get();
-    res.status(200).send(results.docs.map(doc => doc.data().question));
+    questions = results.docs.map(doc => doc.data().question);
   }
   catch(err) {
     console.log(err)
     res.status(500).send("An error has occurred.");
   }
+
+  // randomize and limit number of questions
+  // scuffed randomizer
+  questions.sort(() => Math.random() - 0.5);
+  if (questions.length > count) {
+    questions = questions.slice(0, count);
+  }
+  
+  res.status(200).send(questions);
 });
 
 // takes req.body.question as a string
