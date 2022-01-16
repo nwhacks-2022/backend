@@ -6,6 +6,7 @@ const Multer = require('multer');
 
 const dotenv = require('dotenv');
 const questionRouter = require("./routes/question");
+const historyRouter = require("./routes/history");
 dotenv.config()
 
 // file info
@@ -30,6 +31,7 @@ app.use(bodyParser.json());
 // routes
 app.use("/upload", multer.single('file'), uploadRouter);
 app.use("/question", questionRouter);
+app.use("/history", historyRouter);
 
 app.use("/", (req, res, next) => {
   res.status(200).send("hello :)");

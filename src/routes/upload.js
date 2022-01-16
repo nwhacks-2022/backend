@@ -1,6 +1,7 @@
 let express = require('express');
 const fs = require('fs');
 let { getWavName, toWav, getAudioLen, calculateWpm } = require('../helpers/audio');
+const { saveRecording, saveData } = require('../helpers/data');
 const getText = require('../helpers/speechtotext');
 
 const uploadDir = './uploads';
@@ -28,6 +29,11 @@ uploadRouter.post("/", async (req, res, next) => {
       message: "attach a file"
     })
   }
+  if (!req.body.question) {
+    res.status(400).json({
+      message: "include a question"
+    })
+  }
 
   try {
     const filepath = `${uploadDir}/${req.file.filename}`;
@@ -44,6 +50,12 @@ uploadRouter.post("/", async (req, res, next) => {
     // wpm
     const wpm = calculateWpm(text, audiolen);
 
+    // upload recording to azure storage
+    const url = await saveRecording(filepath);
+
+    // save data to collection
+    await saveData(url, text, req.body.question, audiolen, wpm);
+
     // clean up files
     await cleanup(filepath);
     await cleanup(getWavName(filepath));
@@ -51,7 +63,8 @@ uploadRouter.post("/", async (req, res, next) => {
     // send response
     res.status(200).json({
       text: text,
-      wpm: wpm
+      wpm: wpm,
+      question: req.body.question
     })
   }
   catch(err) {
